@@ -69,17 +69,17 @@ jobs:
         - name: Echo the new version
           run: echo "The new version is ${{ env.NEW_VERSION }}"
 
-        # - name: Update the version in package.json
-        #   run: |
-        #     npm version $NEW_VERSION --no-git-tag-version 
+        - name: Update the version in package.json
+          run: |
+            npm version $NEW_VERSION --no-git-tag-version 
           
-        # - name: Confirm updated package.json version 
-        #   run: |
-        #     latest_version=$(node -p "require('./package.json').version")
-        #     echo "LATEST_VERSION=$latest_version" >> $GITHUB_ENV
+        - name: Confirm updated package.json version 
+          run: |
+            latest_version=$(node -p "require('./package.json').version")
+            echo "LATEST_VERSION=$latest_version" >> $GITHUB_ENV
 
-        # - name: Echo the updated version
-        #   run: echo "The new version is ${{ env.LATEST_VERSION }}"
+        - name: Echo the updated version
+          run: echo "The new version is ${{ env.LATEST_VERSION }}"
 
         - name: Configure git
           run: |
@@ -95,22 +95,22 @@ jobs:
             git tag -a v${{env.NEW_VERSION}} -m "Latest release ${{ env.NEW_VERSION }} for clutta-js-web 🎉"
             git push origin HEAD --tags
           
-        # - name: Build and Publish to GitHub Packages
-        #   run: |
-        #     npm publish
-        #   env:
-        #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        - name: Build and Publish to GitHub Packages
+          run: |
+            npm publish
+          env:
+            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         
-        # - name: Create GitHub release
-        #   if: success()
-        #   uses: actions/create-release@v1
-        #   env:
-        #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #   with:
-        #     tag_name: ${{ env.TAG }}  
-        #     release_name: Release ${{ env.TAG }}
-        #     body: |
-        #       ## Changes
-        #       - Release of ${{ env.TAG }}
-        #     draft: false
-        #     prerelease: false        
+        - name: Create GitHub release
+          if: success()
+          uses: actions/create-release@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            tag_name: ${{ env.TAG }}  
+            release_name: Release ${{ env.TAG }}
+            body: |
+              ## Changes
+              - Release of ${{ env.TAG }}
+            draft: false
+            prerelease: false        
