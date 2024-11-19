@@ -1,0 +1,120 @@
+name: Publish and release clutta-js-web
+
+on:
+  workflow_dispatch: 
+    inputs:
+        versionType:
+          description: 'Version type to increment'
+          required: true
+          type: choice
+          options:
+            - major
+            - minor
+            - patch
+          default: patch
+
+
+build-and-publish-clutta-web:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write  
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org/'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Get current version
+        run: |
+          current_version=$(node -p "require('./package.json').version")
+          echo "CURRENT_VERSION=$current_version" >> $GITHUB_ENV
+      
+      - name: Echo the current version
+        run: echo "The current version of clutta-js-web is ${{ env.CURRENT_VERSION }}"
+
+      - name: Increment js-web version
+        id: increment_js_version
+        run: |
+          version="${{ env.CURRENT_VERSION }}"
+          IFS='.' read -r major minor patch <<< "$version" 
+
+          case "${{ github.event.inputs.versionType}}" in
+            major)
+              major=$((major+1))
+              minor=0
+              patch=0
+              ;;
+            minor)
+              minor=$((minor+1))
+              patch=0
+              ;;
+            patch)
+              patch=$((patch+1))
+              ;;
+          esac
+
+          new_version="$major.$minor.$patch"
+          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
+
+      - name: Echo the new version
+        run: echo "The new version is ${{ env.NEW_VERSION }}"
+
+      # - name: Update the version in package.json
+      #   run: |
+      #     npm version $NEW_VERSION --no-git-tag-version 
+        
+      # - name: Confirm updated package.json version 
+      #   working-directory: libraries/clutta-js-web
+      #   run: |
+      #     latest_version=$(node -p "require('./package.json').version")
+      #     echo "LATEST_VERSION=$latest_version" >> $GITHUB_ENV
+
+      # - name: Echo the updated version
+      #   run: echo "The new version is ${{ env.LATEST_VERSION }}"
+
+      # - name: Configure git
+      #   working-directory: libraries/clutta-js-web
+      #   run: |
+      #     git config --global user.name "GitHub Actions"
+      #     git config --global user.email "actions@github.com"
+        
+      # - name: Tag and Commit changes
+      #   working-directory: libraries/clutta-js-web
+      #   run: |
+      #     git add ./package.json
+      #     git add ./package-lock.json
+      #     git commit -m "Bump clutta-js-web version to ${{ env.NEW_VERSION }}"
+      #     echo "TAG=v${{env.NEW_VERSION}}" >> $GITHUB_ENV
+      #     git tag -a v${{env.NEW_VERSION}} -m "Latest release ${{ env.NEW_VERSION }} for clutta-js-web 🎉"
+      #     git push origin HEAD --tags
+        
+      # - name: Build and Publish to GitHub Packages
+      #   working-directory: libraries/clutta-js-web
+      #   run: |
+      #     npm publish
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      # - name: Create GitHub release
+      #   if: success()
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ env.TAG }}  
+      #     release_name: Release ${{ env.TAG }}
+      #     body: |
+      #       ## Changes
+      #       - Release of ${{ env.TAG }}
+      #     draft: false
+      #     prerelease: false        
