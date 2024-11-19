@@ -1,0 +1,14 @@
+{
+  "name": "@sefastech/clutta-js-web",
+  "version": "0.0.0",
+  "description": "",
+  "main": "SyncClient.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "^11.0.3"
+  }
+}
